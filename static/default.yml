@@ -1,0 +1,8 @@
+poem:               # 诗词插件
+  enable: true      # 是否启用该插件
+
+echo:               # 回声插件
+  enable: true      # 是否启用该插件
+
+gpt:                # GPT插件
+  enable: true      # 是否启用该插件
