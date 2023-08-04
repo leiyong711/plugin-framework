@@ -37,7 +37,7 @@ class Plugin(AbstractPlugin):
 #### 有几种可能：
 1. 你的插件有 bug ，所以加载失败了；
 2. 你的插件的 isValid() 方法与其他插件冲突，导致其他插件先被触发了
-#### 对于第一种情况，最方便的做法是直接查看后台管理端的日志界面，不难看到有类似下面这样的日志：
+#### 对于第一种情况，最方便的做法是直接查日志信息，不难看到有类似下面这样的日志：
 ```python
 2023-08-04 17:36:11.640 | INFO     | utils.plugin_loader:init_plugins:68 - 插件 plugin1 加载成功 
 2023-08-04 17:36:11.642 | INFO     | utils.plugin_loader:init_plugins:64 - 插件 plugin2 已被禁用
