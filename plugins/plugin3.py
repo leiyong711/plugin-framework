@@ -6,18 +6,20 @@
 # Email: leiyong711@163.com
 
 from utils.log import lg
-from utils.AbstractPlugin import AbstractPlugin
+from utils.AbstractPlugin import AbstractPlugin, PluginCannotProcessError
 
 
 class Plugin(AbstractPlugin):
 
     SLUG = "gpt"    # 插件唯一标识符
+    ALIAS = "插件3"  # 插件别名
     PRIORITY = 0    # 插件优先级
 
     def handle(self, text, parsed):
         """处理函数"""
         lg.info(f"当前处理插件为 gpt 插件")
         self.plugin_manager.debug("gpt插件")
+        raise PluginCannotProcessError(f"{self.SLUG}插件无法处理该事件")
 
     def isValid(self, text, parsed):
         return 'gpt' in text.lower()

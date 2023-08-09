@@ -16,6 +16,10 @@ except Exception as e:
     lg.error(f"未检测到插件目录, Error: {e}")
 
 
+class PluginCannotProcessError(Exception):
+    pass
+
+
 class AbstractPlugin(metaclass=ABCMeta):
     """技能插件基类"""
 

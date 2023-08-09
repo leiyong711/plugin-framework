@@ -6,6 +6,7 @@
 # Email: leiyong711@163.com
 
 import os
+import threading
 from utils.log import lg
 import ruamel.yaml.scanner
 from utils import constants
@@ -15,19 +16,21 @@ from jsonpath import jsonpath
 
 def singleton(cls):
     instances = {}
+    lock = threading.Lock()
 
     def wrapper(*args, **kwargs):
         if cls not in instances:
-            instances[cls] = cls(*args, **kwargs)
+            with lock:
+                if cls not in instances:
+                    instances[cls] = cls(*args, **kwargs)
         return instances[cls]
-
     return wrapper
 
 
 @singleton
 class Config:
 
-    def __init__(self, custom_config=True) -> None:
+    def __init__(self, custom_config=False) -> None:
         """
         :param custom_config:   是否使用自定义配置，默认使用 static/default.yml 中的默认配置
         """
@@ -36,6 +39,7 @@ class Config:
         self.custom_config = custom_config
         self.get_config_path()
         self.reload(res=False)
+        self.lock = threading.Lock()
 
     def get_config_path(self) -> None:
         """
@@ -46,10 +50,14 @@ class Config:
 
         # 使用自定义配置
         if self.custom_config:
+            # 配置文件是否存在
             if not os.path.exists(constants.getConfigPath()):
+                # 配置文件路径不存在，创建配置文件路径
+                if not os.path.exists(f"{constants.CONFIG_PATH}"):
+                    os.mkdir(constants.CONFIG_PATH)
+
                 lg.warning(
                     f"自定义配置文件不存在，正在创建自定义配置文件，路径: {constants.CONFIG_PATH}/{constants.CUSTOM_CONFIG_NAME}")
-                os.mkdir(constants.CONFIG_PATH)
                 # 复制默认配置文件
                 constants.newConfig()
             # 自定义配置文件路径
@@ -59,7 +67,7 @@ class Config:
         yaml = YAML()
         self.get_config_path()
         try:
-            with open(self.config_path, "rb") as fp:
+            with open(self.config_path, "r", encoding="utf-8") as fp:
                 yconfig = yaml.load(fp)
             return yconfig
         except FileNotFoundError:
@@ -69,13 +77,17 @@ class Config:
             lg.error("配置文件格式错误")
             exit(1)
 
-    def reload(self, res=True) -> None:
+    def reload(self, res=True) -> bool:
         """
         重新加载配置
         """
-        self.config = self._load_config()
-        if res:
-            lg.info(f"配置文件已更新")
+        try:
+            self.config = self._load_config()
+            if res:
+                lg.info(f"配置文件已更新")
+            return True
+        except:
+            return False
 
     def get(self, key: str, default=None, warn=False):
         """
@@ -119,7 +131,7 @@ class Config:
         更新配置文件，不会覆盖原有配置及注释
         """
         yaml = YAML()
-        with open(self.config_path, "w") as fp:
+        with open(self.config_path, "w", encoding="utf-8") as fp:
             yaml.dump(data, fp)
         self.reload()
 

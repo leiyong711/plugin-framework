@@ -35,6 +35,15 @@ def init_plugins(con):
     nameSet = set()
 
     for finder, name, ispkg in pkgutil.walk_packages(locations):
+
+        # 重新加载模块
+        try:
+            importlib.reload(mod)
+        except ModuleNotFoundError:
+            ...
+        except UnboundLocalError:
+            ...
+
         try:
             loader = finder.find_module(name)
             mod = loader.load_module(name)
@@ -61,11 +70,11 @@ def init_plugins(con):
         # 是否启用插件
         if config.has(plugin.SLUG) and "enable" in config.get(plugin.SLUG):
             if not config.get(plugin.SLUG)["enable"]:
-                lg.info(f"插件 {name} 已被禁用")
+                lg.info(f"插件 {name}-{plugin.ALIAS} 已被禁用")
                 continue
 
         if issubclass(mod.Plugin, AbstractPlugin):
-            lg.info(f"插件 {name} 加载成功 ")
+            lg.info(f"插件 {name}-{plugin.ALIAS} 加载成功 ")
             _plugins_query.append(plugin)
 
     def sort_priority(m):

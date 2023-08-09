@@ -25,9 +25,15 @@ class PluginManager:
 
     def run_plugins(self, text, parsed):
         for plugin in self.plugins:
-            if plugin.isValid(text, parsed):
-                plugin.handle(text, parsed)
-                return
+            try:
+                if plugin.isValid(text, parsed):
+                    plugin.handle(text, parsed)
+                    return
+            except PluginCannotProcessError as e:
+                ...
+            except:
+                lg.error(traceback.format_exc())
+                lg.error(f"插件 {plugin.SLUG}-{plugin.ALIAS} 运行出错，已跳过")
         lg.info("没有匹配的技能")
 
     def debug(self, msg):
